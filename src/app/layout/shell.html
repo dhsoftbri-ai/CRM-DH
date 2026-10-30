@@ -1,0 +1,80 @@
+@if (!compact()) {
+  <nav class="rail" aria-label="Navegación principal">
+    <img class="rail-logo" src="isotipo.png" alt="DH Softbri" />
+    <button mat-fab class="rail-fab" (click)="newClient()" matTooltip="Nuevo cliente" matTooltipPosition="right" aria-label="Nuevo cliente">
+      <mat-icon>person_add</mat-icon>
+    </button>
+    <div class="rail-items">
+      @for (item of nav; track item.path) {
+        <a class="rail-item" [routerLink]="item.path" routerLinkActive="active" #rla="routerLinkActive" [attr.aria-current]="rla.isActive ? 'page' : null">
+          <span class="indicator"><mat-icon>{{ item.icon }}</mat-icon></span>
+          <span class="label">{{ item.label }}</span>
+        </a>
+      }
+    </div>
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Cuenta" class="rail-account">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+  </nav>
+}
+
+<div class="main">
+  <header class="topbar">
+    @if (compact()) {
+      <img class="top-logo" src="logo.png" alt="DH Softbri" />
+    } @else {
+      <span class="product">DH CRM</span>
+    }
+    <span class="spacer"></span>
+    @if (demo) {
+      <span class="demo-chip" matTooltip="Datos de ejemplo guardados en este navegador. Configura tu Client ID para usar Zoho.">
+        <mat-icon>science</mat-icon> Modo demo
+      </span>
+    } @else {
+      <span class="zoho-chip"><mat-icon>cloud_done</mat-icon> Zoho CRM</span>
+    }
+    <button mat-icon-button (click)="store.refresh()" matTooltip="Actualizar" aria-label="Actualizar datos">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    @if (compact()) {
+      <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Cuenta">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    }
+  </header>
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" class="loading" />
+  }
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>
+
+@if (compact() && showMobileFab()) {
+  <button mat-fab extended class="mobile-fab" (click)="newClient()">
+    <mat-icon>person_add</mat-icon> Cliente
+  </button>
+}
+@if (compact()) {
+  <nav class="bottom-bar" aria-label="Navegación principal">
+    @for (item of nav; track item.path) {
+      <a class="bottom-item" [routerLink]="item.path" routerLinkActive="active" #rla="routerLinkActive" [attr.aria-current]="rla.isActive ? 'page' : null">
+        <span class="indicator"><mat-icon>{{ item.icon }}</mat-icon></span>
+        <span class="label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+}
+
+<mat-menu #accountMenu="matMenu">
+  @if (demo) {
+    <button mat-menu-item (click)="resetDemo()">
+      <mat-icon>restart_alt</mat-icon> Restablecer datos de ejemplo
+    </button>
+  } @else {
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon> Cerrar sesión de Zoho
+    </button>
+  }
+</mat-menu>

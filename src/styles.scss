@@ -1,0 +1,39 @@
+@use '@angular/material' as mat;
+@use './theme-colors' as brand;
+
+// Tema Material 3 generado a partir de los colores de DH Softbri
+// (Blue Steel #0265CF como primario, Deep Blue #01092E como terciario).
+html {
+  color-scheme: light;
+  @include mat.theme(
+    (
+      color: (
+        primary: brand.$primary-palette,
+        tertiary: brand.$tertiary-palette,
+      ),
+      typography: (
+        plain-family: 'Plus Jakarta Sans Variable, Roboto, system-ui, sans-serif',
+        brand-family: 'Plus Jakarta Sans Variable, Roboto, system-ui, sans-serif',
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+}
+
+// Para modo oscuro automático cambia la línea de arriba por: color-scheme: light dark;
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }

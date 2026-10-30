@@ -1,0 +1,160 @@
+<a mat-button routerLink="/clientes" class="back"><mat-icon>arrow_back</mat-icon> Clientes</a>
+
+@if (client(); as c) {
+  <div class="layout">
+    <!-- Perfil -->
+    <section class="profile">
+      <div class="identity">
+        <span class="avatar" [style.background]="color(c.status)">{{ initials(c.fullName) }}</span>
+        <div>
+          <h1>{{ c.fullName }}</h1>
+          <p class="company">{{ c.company }}</p>
+        </div>
+      </div>
+
+      <mat-form-field class="status-field" subscriptSizing="dynamic">
+        <mat-label>Estatus</mat-label>
+        <mat-select [value]="c.status" (selectionChange)="changeStatus($event.value)">
+          <mat-select-trigger>
+            <span class="dot" [style.background]="color(c.status)"></span>{{ c.status }}
+          </mat-select-trigger>
+          @for (s of store.statuses(); track s) {
+            <mat-option [value]="s"><span class="dot" [style.background]="color(s)"></span>{{ s }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="actions">
+        @if (c.phone) {
+          <a mat-stroked-button [href]="'tel:' + c.phone"><mat-icon>call</mat-icon> Llamar</a>
+          <a mat-stroked-button [href]="whatsappUrl(c.phone)" target="_blank" rel="noopener"><mat-icon>chat</mat-icon> WhatsApp</a>
+        }
+        @if (c.email) {
+          <a mat-stroked-button [href]="'mailto:' + c.email"><mat-icon>mail</mat-icon> Correo</a>
+        }
+      </div>
+
+      <dl class="info">
+        @if (c.email) { <dt>Correo</dt><dd>{{ c.email }}</dd> }
+        @if (c.phone) { <dt>Teléfono</dt><dd>{{ c.phone }}</dd> }
+        @if (c.source) { <dt>Origen</dt><dd>{{ c.source }}</dd> }
+        @if (c.modifiedTime) { <dt>Última actividad</dt><dd>{{ c.modifiedTime | date: 'd MMM y, h:mm a' }}</dd> }
+      </dl>
+      @if (c.description) {
+        <p class="desc">{{ c.description }}</p>
+      }
+    </section>
+
+    <!-- Actividad -->
+    <section class="activity">
+      <mat-tab-group mat-stretch-tabs="true" animationDuration="150ms">
+        <!-- Notas -->
+        <mat-tab>
+          <ng-template mat-tab-label>Notas <span class="badge">{{ notes().length }}</span></ng-template>
+          <div class="pane">
+            <div class="composer">
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label>Escribe una nota</mat-label>
+                <textarea matInput rows="3" [ngModel]="noteDraft()" (ngModelChange)="noteDraft.set($event)"
+                  (keydown.control.enter)="addNote()" (keydown.meta.enter)="addNote()"
+                  placeholder="¿Qué se habló? Acuerdos, objeciones, próximos pasos…"></textarea>
+              </mat-form-field>
+              <div class="composer-actions">
+                <small>Ctrl + Enter para guardar</small>
+                <button mat-flat-button (click)="addNote()" [disabled]="!noteDraft().trim() || savingNote()">
+                  <mat-icon>add_comment</mat-icon> Agregar nota
+                </button>
+              </div>
+            </div>
+            <ol class="timeline">
+              @for (n of notes(); track n.id) {
+                <li>
+                  <span class="t-dot"></span>
+                  <time>{{ n.createdTime | date: 'EEE d MMM, h:mm a' }}</time>
+                  <p>{{ n.content }}</p>
+                </li>
+              } @empty {
+                @if (!busy()) { <p class="empty">Aún no hay notas.</p> }
+              }
+            </ol>
+          </div>
+        </mat-tab>
+
+        <!-- Tareas -->
+        <mat-tab>
+          <ng-template mat-tab-label>Tareas <span class="badge">{{ openTasks().length }}</span></ng-template>
+          <div class="pane">
+            <button matButton="tonal" class="add" (click)="newTask()"><mat-icon>add_task</mat-icon> Nueva tarea</button>
+            <ul class="items">
+              @for (t of openTasks(); track t.id) {
+                @let due = dueLabel(t);
+                <li class="task">
+                  <mat-checkbox (change)="complete(t)" [attr.aria-label]="'Completar ' + t.subject" />
+                  <div class="task-body">
+                    <strong>{{ t.subject }}</strong>
+                    <span class="meta">
+                      <span [class]="'due ' + due.tone">
+                        <mat-icon>event</mat-icon>
+                        {{ due.text || (parseDate(t.dueDate!) | date: 'EEE d MMM') }}
+                      </span>
+                      @if (t.priority === 'High' || t.priority === 'Highest') {
+                        <span class="prio"><mat-icon>priority_high</mat-icon>{{ priorityLabel[t.priority] }}</span>
+                      }
+                    </span>
+                  </div>
+                </li>
+              } @empty {
+                @if (!busy()) { <li class="empty">Sin tareas pendientes.</li> }
+              }
+            </ul>
+            @if (doneTasks().length) {
+              <h3 class="sub">Completadas</h3>
+              <ul class="items done">
+                @for (t of doneTasks(); track t.id) {
+                  <li class="task"><mat-icon>check_circle</mat-icon><div class="task-body"><strong>{{ t.subject }}</strong></div></li>
+                }
+              </ul>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Reuniones -->
+        <mat-tab>
+          <ng-template mat-tab-label>Reuniones <span class="badge">{{ upcoming().length }}</span></ng-template>
+          <div class="pane">
+            <button matButton="tonal" class="add" (click)="newMeeting()"><mat-icon>event_available</mat-icon> Agendar reunión</button>
+            <ul class="items">
+              @for (m of upcoming(); track m.id) {
+                <li class="meeting">
+                  <div class="date-box">
+                    <span class="mon">{{ m.start | date: 'MMM' }}</span>
+                    <span class="day">{{ m.start | date: 'd' }}</span>
+                  </div>
+                  <div class="task-body">
+                    <strong>{{ m.title }}</strong>
+                    <span class="meta">
+                      <span><mat-icon>schedule</mat-icon>{{ m.start | date: 'EEEE, h:mm a' }} – {{ m.end | date: 'h:mm a' }}</span>
+                      @if (m.venue) { <span><mat-icon>place</mat-icon>{{ m.venue }}</span> }
+                    </span>
+                  </div>
+                </li>
+              } @empty {
+                @if (!busy()) { <li class="empty">No hay reuniones próximas.</li> }
+              }
+            </ul>
+            @if (past().length) {
+              <h3 class="sub">Anteriores</h3>
+              <ul class="items done">
+                @for (m of past(); track m.id) {
+                  <li class="task"><mat-icon>history</mat-icon><div class="task-body"><strong>{{ m.title }}</strong><span class="meta">{{ m.start | date: 'd MMM y' }}</span></div></li>
+                }
+              </ul>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </section>
+  </div>
+} @else {
+  <div class="loading"><mat-spinner diameter="40" /></div>
+}

@@ -1,0 +1,113 @@
+:host {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--mat-sys-surface);
+}
+
+.spacer { flex: 1; }
+
+/* ---------- Navigation rail (≥ 840px) ---------- */
+.rail {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  width: 88px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0 20px;
+  background: var(--mat-sys-surface-container-low);
+}
+.rail-logo { width: 36px; height: 36px; object-fit: contain; margin-bottom: 8px; }
+.rail-fab { margin-bottom: 20px; }
+.rail-items { display: flex; flex-direction: column; gap: 12px; }
+
+.rail-item, .bottom-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+  -webkit-tap-highlight-color: transparent;
+
+  .indicator {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 32px;
+    border-radius: var(--mat-sys-corner-full);
+    transition: background-color 200ms;
+  }
+  &:hover .indicator { background: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent); }
+  &:focus-visible { outline: none; .indicator { outline: 2px solid var(--mat-sys-primary); } }
+  &.active {
+    color: var(--mat-sys-on-surface);
+    font-weight: 600;
+    .indicator { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
+    mat-icon { font-variation-settings: 'FILL' 1; }
+  }
+}
+
+/* ---------- Main ---------- */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  padding: 0 16px 0 24px;
+  background: var(--mat-sys-surface);
+}
+.product { font: var(--mat-sys-title-large); color: var(--mat-sys-on-surface); }
+.top-logo { height: 26px; }
+
+.demo-chip, .zoho-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: var(--mat-sys-corner-small);
+  font: var(--mat-sys-label-large);
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+.demo-chip { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
+.zoho-chip { border: 1px solid var(--mat-sys-outline-variant); color: var(--mat-sys-on-surface-variant); }
+
+.loading { position: sticky; top: 64px; z-index: 5; }
+
+.content { flex: 1; min-width: 0; padding: 0 24px 32px; }
+
+/* ---------- Compact (< 840px) ---------- */
+@media (max-width: 839.98px) {
+  .topbar { padding: 0 8px 0 16px; }
+  .content { padding: 0 16px 112px; }
+  .demo-chip, .zoho-chip { font: var(--mat-sys-label-medium); }
+}
+
+.bottom-bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-around;
+  height: 80px;
+  padding: 12px 0 calc(16px + env(safe-area-inset-bottom));
+  background: var(--mat-sys-surface-container);
+}
+.bottom-item { flex: 1; }
+
+.mobile-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  z-index: 10;
+}
